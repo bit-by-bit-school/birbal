@@ -3,9 +3,13 @@ name = "org-sage"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.12"
 dependencies = [
+    "chromadb>=1.4.0",
     "langchain>=1.2.0",
+    "langchain-chroma>=1.1.0",
+    "langchain-ollama>=1.0.1",
+    "langchain-text-splitters>=1.1.0",
     "orgparse>=0.4.20251020",
     "pandas>=2.3.3",
     "python-dotenv>=1.2.1",

@@ -7,7 +7,7 @@ import pandas as pd
 import re
 
 def get_all_filenames_in_roam():
-    roam_path = os.getenv('ROAM_PATH')
+    roam_path = os.getenv('ROAM_DIR')
     path = os.path.join(roam_path, "**/*.org")
     files = glob.glob(path, recursive=True)
 

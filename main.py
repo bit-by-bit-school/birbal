@@ -1,10 +1,11 @@
 from dotenv import load_dotenv
 from parse_org_roam import org_files_to_dataframes
+from embedding import embed_df
 
 def main():
-    load_dotenv()  # Loads variables from .env into os.environ
+    load_dotenv()
     df = org_files_to_dataframes()
-    print(df["text_to_encode"])
+    embed_df(df)
 
 
 if __name__ == "__main__":
