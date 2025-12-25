@@ -10,7 +10,7 @@ def query_vector(query_str):
     embeddings = OllamaEmbeddings(model=embedding_model)
     
     vectordb = Chroma(collection_name="org_roam", embedding_function=embeddings, persist_directory=persist_directory)
-    retriever = vectordb.as_retriever(search_type="similarity", search_kwargs={"k": 3}) # parametrize
+    retriever = vectordb.as_retriever(search_type="similarity", search_kwargs={"k": 7}) # parametrize
     retrieved_docs = retriever.invoke(query_str)
 
     return retrieved_docs
