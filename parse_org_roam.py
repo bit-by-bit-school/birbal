@@ -5,9 +5,10 @@ import glob
 import orgparse
 import pandas as pd
 import re
+from config import config
 
 def get_all_filenames_in_roam():
-    roam_path = os.getenv('ROAM_DIR')
+    roam_path = config['roam_dir']
     path = os.path.join(roam_path, "**/*.org")
     files = glob.glob(path, recursive=True)
 

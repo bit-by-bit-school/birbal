@@ -1,15 +1,13 @@
 # This module converts a provided data frame into a vector embedding and stores it
 
-import os
 from langchain_ollama import OllamaEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
+from config import config
 
 def embed_df(df):
-    persist_directory = os.getenv('PERSIST_DIR')
-    embedding_model = os.getenv('EMBEDDING_MODEL')
-    embeddings = OllamaEmbeddings(model=embedding_model)
-    vectordb = Chroma(collection_name="org_roam", embedding_function=embeddings, persist_directory=persist_directory)
+    embeddings = OllamaEmbeddings(model=config['embedding_model'])
+    vectordb = Chroma(collection_name="org_roam", embedding_function=embeddings, persist_directory=config['persist_dir'])
 
     vectordb.add_texts(list(df["text_to_encode"].values),
                        metadatas=[{"ID": df.iloc[i]["node_id"],
@@ -19,7 +17,9 @@ def embed_df(df):
                        ids=list(df["node_id"]))
 
 def split_nodes():
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=300, chunk_overlap=0) # parametrize these in env vars also
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=config['text_split_chunk_size'], 
+        chunk_overlap=config['text_split_chunk_overlap'])
 
     for index, row in data.iterrows():
         org_id = row["node_id"]

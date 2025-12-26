@@ -1,7 +1,7 @@
-import os
 from langchain_ollama import ChatOllama
 from langchain.agents import create_agent
 from langchain.agents.middleware import dynamic_prompt, ModelRequest
+from config import config
 from query import query_vector
 
 @dynamic_prompt
@@ -22,9 +22,8 @@ def prompt_with_context(request: ModelRequest) -> str:
 
 
 def query_llm(query):
-    llm_model = os.getenv('LARGE_LANGUAGE_MODEL')
     llm = ChatOllama(
-        model=llm_model,
+        model=config['large_language_model'],
         temperature=0,
         # other params...
     )
