@@ -24,57 +24,40 @@ def embed_df(df):
         - title (str)
             A short human-readable title for the document or note.
 
-        - hierarchy (str)
-            A hierarchical path or outline location for the document
-            (e.g. "Projects/AI/Embeddings").
-
         - file_name (str)
             The source filename associated with this document.
+
+    It can additionally contain the following columns:
+
+        - hierarchy (str)
+            A list of node titles going from the current node to its ancestor (if they exist).
     """
     embeddings = OllamaEmbeddings(model=config["embedding_model"])
     vectordb = Chroma(
-        collection_name="org_roam",
+        collection_name="notes",
         embedding_function=embeddings,
         persist_directory=config["persist_dir"],
     )
-
-    vectordb.add_texts(
-        list(df["text_to_encode"].values),
-        metadatas=[
-            {
-                "ID": df.iloc[i]["id"],
-                "title": df.iloc[i]["title"],
-                "hierarchy": df.iloc[i]["hierarchy"],
-                "file_name": df.iloc[i]["file_name"],
-            }
-            for i in range(len(df))
-        ],
-        ids=list(df["id"]),
-    )
-
-
-def split_nodes(nodes):
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=config["text_split_chunk_size"],
         chunk_overlap=config["text_split_chunk_overlap"],
     )
 
-    for index, row in data.iterrows():
-        org_id = row["id"]
+    for index, row in df.iterrows():
+        id = row["id"]
         title = row["title"]
         file_name = row["file_name"]
-        node_hierarchy = row["hierarchy"]
-        texts = text_splitter.split_text(row["node_text_nested_exclusive"])
-        texts = ["[" + node_hierarchy + "] " + text for text in texts]
+        hierarchy = row["hierarchy"] or row["title"]
+        texts = text_splitter.split_text(row["text_to_encode"])
+        texts = ["[" + hierarchy + "] " + text for text in texts]
         metadatas = [
             {
-                "source": f"{index}-{i}",
-                "ID": org_id,
+                "ID": id,
                 "title": title,
-                "hierarchy": node_hierarchy,
+                "hierarchy": hierarchy,
                 "file_name": file_name,
             }
             for i in range(len(texts))
         ]
-        ids = [f"{index}-{i}" for i in range(len(texts))]
+        ids = [f"{id}-{i}" for i in range(len(texts))]
         vectordb.add_texts(texts, metadatas=metadatas, ids=ids)
