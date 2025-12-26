@@ -4,10 +4,18 @@ from langchain_ollama import OllamaEmbeddings
 from langchain_chroma import Chroma
 from config import config
 
+
 def query_vector(query_str):
-    embeddings = OllamaEmbeddings(model=config['embedding_model'])
-    vectordb = Chroma(collection_name="org_roam", embedding_function=embeddings, persist_directory=config['persist_dir'])
-    retriever = vectordb.as_retriever(search_type="similarity", search_kwargs={"k": config['k_nearest_neighbors_to_retrieve']})
+    embeddings = OllamaEmbeddings(model=config["embedding_model"])
+    vectordb = Chroma(
+        collection_name="org_roam",
+        embedding_function=embeddings,
+        persist_directory=config["persist_dir"],
+    )
+    retriever = vectordb.as_retriever(
+        search_type="similarity",
+        search_kwargs={"k": config["k_nearest_neighbors_to_retrieve"]},
+    )
     retrieved_docs = retriever.invoke(query_str)
 
     return retrieved_docs
@@ -20,6 +28,3 @@ def query_vector(query_str):
 #                            doc.metadata["title"].strip(),
 #                                doc.metadata["hierarchy"].strip())
 #                          for doc, score in retrieved_docs]
-
-
-
