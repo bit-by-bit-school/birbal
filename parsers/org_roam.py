@@ -41,6 +41,7 @@ def extract_node_nested_body(node):
             + "\n"
             + extract_node_nested_body(child)
         )
+    
     return body.strip()
 
 
@@ -56,6 +57,8 @@ def extract_node_nested_body_exclusive(node):
                 + "\n"
                 + extract_node_nested_body_exclusive(child)
             )
+    body.replace("#+filetags:", "tags:").replace("#+title:", "title:")
+
     return body.strip()
 
 
@@ -66,62 +69,80 @@ def build_node_hierarchy(node):
     while parent:
         hierarchy.append(extract_title(parent))
         parent = parent.parent
-    return " > ".join(reversed(hierarchy)).strip()
+    
+    return hierarchy
 
 
 def node_to_dict(node, file_name):
     node_dict = {
         "file_name": file_name,
-        "node_id": node.properties.get("ID"),
-        "node_title": extract_title(node),
-        "node_hierarchy": build_node_hierarchy(node),
-        "node_text": node.body,
-        "node_text_nested": extract_node_nested_body(node),
+        "id": node.properties.get("ID"),
+        "title": extract_title(node),
+        "hierarchy": build_node_hierarchy(node),
         "node_text_nested_exclusive": extract_node_nested_body_exclusive(node),
     }
     return node_dict
 
 
+def split_node_by_org_headings(node_dict):
+    root_text = node_dict["node_text_nested_exclusive"]
+    base_hierarchy = node_dict["hierarchy"]
+
+    def split_recursive(text, depth, parent_titles):
+        star_pattern = r"\n\*{" + str(depth) + r"}\s+"
+        parts = re.split(star_pattern, text)
+
+        # If no further splits possible, this is a leaf node
+        if len(parts) == 1:
+            return [
+                {
+                    **node_dict,
+                    "node_text_nested_exclusive": text,
+                    "hierarchy": parent_titles,
+                }
+            ]
+
+        children = []
+        for part in parts:
+            lines = part.splitlines()
+            title = lines[0]
+
+            children.extend(split_recursive(part, depth + 1, parent_titles + [title]))
+        return children
+
+    results = split_recursive(root_text, 1, base_hierarchy)
+    return results
+
+
+def format_node(node_dict):
+    formatted_hierarchy = f" > ".join(reversed(node_dict["hierarchy"])).strip()
+    text_to_encode = "[" + formatted_hierarchy + "] " + node_dict["node_text_nested_exclusive"]
+    
+    return {
+        **node_dict,
+        "hierarchy": formatted_hierarchy,
+        "text_to_encode": text_to_encode,
+    }
+
+
 def org_roam_nodes_to_dataframe(org_file):
-    # Load the org file into an OrgData object
     org_data = orgparse.load(org_file)
-    # Create a list of all org-roam nodes in the OrgData object
     nodes = [
         node_to_dict(node, org_file)
         for node in org_data[0][:]
         if node.properties.get("ID")
     ]
+    split_nodes = [
+        subnode for node_dict in nodes for subnode in split_node_by_org_headings(node_dict)
+    ]
+    formatted_nodes = [format_node(node) for node in split_nodes]
 
-    return pd.DataFrame(nodes)
+    return pd.DataFrame(formatted_nodes)
+
 
 
 def org_files_to_dataframes():
     roam_nodes_df = pd.concat(
         [org_roam_nodes_to_dataframe(file) for file in get_all_filenames_in_roam()]
     )
-    roam_nodes_df["text_to_encode"] = (
-        roam_nodes_df["node_text_nested_exclusive"]
-        .astype(str)
-        .str.replace("#+filetags:", "tags:")
-        .str.replace("#+title:", "title:")
-    )
-    roam_nodes_df["text_to_encode"] = (
-        "["
-        + roam_nodes_df["node_hierarchy"]
-        + "] "
-        + roam_nodes_df["text_to_encode"].astype(str)
-    )
     return roam_nodes_df
-
-
-        # list(df["text_to_encode"].values),
-        # metadatas=[
-        #     {
-        #         "ID": df.iloc[i]["node_id"],
-        #         "title": df.iloc[i]["node_title"],
-        #         "hierarchy": df.iloc[i]["node_hierarchy"],
-        #         "file_name": df.iloc[i]["file_name"],
-        #     }
-        #     for i in range(len(df))
-        # ],
-        # ids=list(df["node_id"]),
