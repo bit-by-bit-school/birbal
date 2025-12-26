@@ -33,4 +33,6 @@ def query_llm(query):
         {"messages": [{"role": "user", "content": query}]},
         stream_mode="values",
     ):
-        step["messages"][-1].pretty_print()
+        msg = step["messages"][-1]
+        if msg.type == "ai":
+            return msg.content

@@ -1,7 +1,8 @@
 from dotenv import load_dotenv
 from parse_org_roam import org_files_to_dataframes
 from embedding import embed_df
-from llm import query_llm
+from server import app
+import uvicorn
 
 def load():
     df = org_files_to_dataframes()
@@ -9,8 +10,7 @@ def load():
 
 def main():
     load_dotenv()
-    query_llm("What are all the things I need to do to run Org Roam UI on my ipad?")
-
+    uvicorn.run(app, host="0.0.0.0", port=8080)
 
 if __name__ == "__main__":
     main()
