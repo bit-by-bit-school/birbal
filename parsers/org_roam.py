@@ -41,7 +41,7 @@ def extract_node_nested_body(node):
             + "\n"
             + extract_node_nested_body(child)
         )
-    
+
     return body.strip()
 
 
@@ -69,7 +69,7 @@ def build_node_hierarchy(node):
     while parent:
         hierarchy.append(extract_title(parent))
         parent = parent.parent
-    
+
     return hierarchy
 
 
@@ -79,13 +79,13 @@ def node_to_dict(node, file_name):
         "id": node.properties.get("ID"),
         "title": extract_title(node),
         "hierarchy": build_node_hierarchy(node),
-        "node_text_nested_exclusive": extract_node_nested_body_exclusive(node),
+        "text": extract_node_nested_body_exclusive(node),
     }
     return node_dict
 
 
 def split_node_by_org_headings(node_dict):
-    root_text = node_dict["node_text_nested_exclusive"]
+    root_text = node_dict["text"]
     base_hierarchy = node_dict["hierarchy"]
 
     def split_recursive(text, depth, parent_titles):
@@ -97,7 +97,7 @@ def split_node_by_org_headings(node_dict):
             return [
                 {
                     **node_dict,
-                    "node_text_nested_exclusive": text,
+                    "text": text,
                     "hierarchy": parent_titles,
                 }
             ]
@@ -108,7 +108,9 @@ def split_node_by_org_headings(node_dict):
             title = lines[0].strip()
 
             extended_parents = (
-                parent_titles if title.lower().startswith("title:") else parent_titles + [title]
+                parent_titles
+                if title.lower().startswith("title:")
+                else parent_titles + [title]
             )
 
             children.extend(split_recursive(part, depth + 1, extended_parents))
@@ -120,12 +122,14 @@ def split_node_by_org_headings(node_dict):
 
 def format_node(node_dict):
     formatted_hierarchy = f" > ".join(reversed(node_dict["hierarchy"])).strip()
-    text_to_encode = "[" + formatted_hierarchy + "] " + node_dict["node_text_nested_exclusive"]
-    
+    text_to_encode = (
+        "[" + formatted_hierarchy + "] " + node_dict["text"]
+    )
+
     return {
         **node_dict,
         "hierarchy": formatted_hierarchy,
-        "text_to_encode": text_to_encode,
+        "text": text_to_encode,
     }
 
 
@@ -137,12 +141,13 @@ def org_roam_nodes_to_dataframe(org_file):
         if node.properties.get("ID")
     ]
     split_nodes = [
-        subnode for node_dict in nodes for subnode in split_node_by_org_headings(node_dict)
+        subnode
+        for node_dict in nodes
+        for subnode in split_node_by_org_headings(node_dict)
     ]
     formatted_nodes = [format_node(node) for node in split_nodes]
 
     return pd.DataFrame(formatted_nodes)
-
 
 
 def org_files_to_dataframes():
