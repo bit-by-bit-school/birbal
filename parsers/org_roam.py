@@ -57,7 +57,7 @@ def extract_node_nested_body_exclusive(node):
                 + "\n"
                 + extract_node_nested_body_exclusive(child)
             )
-    body.replace("#+filetags:", "tags:").replace("#+title:", "title:")
+    body = body.replace("#+filetags:", "tags:").replace("#+title:", "title:")
 
     return body.strip()
 
@@ -105,9 +105,13 @@ def split_node_by_org_headings(node_dict):
         children = []
         for part in parts:
             lines = part.splitlines()
-            title = lines[0]
+            title = lines[0].strip()
 
-            children.extend(split_recursive(part, depth + 1, parent_titles + [title]))
+            extended_parents = (
+                parent_titles if title.lower().startswith("title:") else parent_titles + [title]
+            )
+
+            children.extend(split_recursive(part, depth + 1, extended_parents))
         return children
 
     results = split_recursive(root_text, 1, base_hierarchy)
