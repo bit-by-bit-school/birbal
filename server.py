@@ -1,10 +1,12 @@
 from fastapi import FastAPI, Query
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import StreamingResponse
 from llm import query_llm
 
 app = FastAPI()
 
-@app.get("/query", response_class=PlainTextResponse)
+@app.get("/query")
 def query(q: str = Query(..., min_length=1)):
-    result = query_llm(q)
-    return result
+    return StreamingResponse(
+        query_llm(q),
+        media_type="text/plain"
+    )

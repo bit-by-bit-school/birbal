@@ -25,7 +25,7 @@ def query_llm(query):
     llm = ChatOllama(
         model=config['large_language_model'],
         temperature=0,
-        # other params...
+        stream=True
     )
     agent = create_agent(llm, tools=[], middleware=[prompt_with_context])
     for step in agent.stream(
@@ -34,4 +34,4 @@ def query_llm(query):
     ):
         msg = step["messages"][-1]
         if msg.type == "ai":
-            return msg.content
+            yield msg.content
