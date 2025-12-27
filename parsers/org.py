@@ -45,8 +45,21 @@ def extract_node_nested_body(node):
     return body.strip()
 
 
+def format_org_roam_links(node_body):
+    """Note that this uses the descriptive title as the related note,
+    which may not be the actual note name -> possible to improve?"""
+    ORG_ROAM_LINK_RE = re.compile(r"\[\[id:([^\]]+)\]\[([^\]]+)\]\]")
+
+    def rewrite_roam_link(match):
+        title = match.group(2)
+        return f"{title} [RELATED NOTE: {title}]"
+
+    return ORG_ROAM_LINK_RE.sub(rewrite_roam_link, node_body)
+
+
 def extract_node_nested_body_exclusive(node):
-    body = node.body
+    body = node.get_body(format="raw")
+
     for child in node.children:
         if not child.properties.get("ID") and not child.properties.get("SEARCH"):
             body += (
@@ -57,7 +70,9 @@ def extract_node_nested_body_exclusive(node):
                 + "\n"
                 + extract_node_nested_body_exclusive(child)
             )
+
     body = body.replace("#+filetags:", "tags:").replace("#+title:", "title:")
+    body = format_org_roam_links(body)
 
     return body.strip()
 
@@ -120,15 +135,13 @@ def split_node_by_org_headings(node_dict):
     split_nodes = split_recursive(root_text, 1, base_hierarchy)
     for i, node in enumerate(split_nodes):
         node["id"] = f"{base_id}.{i}"
-    
+
     return split_nodes
 
 
 def format_node(node_dict):
     formatted_hierarchy = f" > ".join(reversed(node_dict["hierarchy"])).strip()
-    text_to_encode = (
-        "[" + formatted_hierarchy + "] " + node_dict["text"]
-    )
+    text_to_encode = "[" + formatted_hierarchy + "] " + node_dict["text"]
 
     return {
         **node_dict,
