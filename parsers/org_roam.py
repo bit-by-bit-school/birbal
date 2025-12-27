@@ -76,7 +76,7 @@ def build_node_hierarchy(node):
 def node_to_dict(node, file_name):
     node_dict = {
         "file_name": file_name,
-        "id": node.properties.get("ID"),
+        "root_id": node.properties.get("ID"),
         "title": extract_title(node),
         "hierarchy": build_node_hierarchy(node),
         "text": extract_node_nested_body_exclusive(node),
@@ -87,7 +87,7 @@ def node_to_dict(node, file_name):
 def split_node_by_org_headings(node_dict):
     root_text = node_dict["text"]
     base_hierarchy = node_dict["hierarchy"]
-    base_id = node_dict["id"]
+    base_id = node_dict["root_id"]
 
     def split_recursive(text, depth, parent_titles):
         star_pattern = r"\n\*{" + str(depth) + r"}\s+"

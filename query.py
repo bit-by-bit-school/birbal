@@ -20,7 +20,11 @@ def query_vector(query_str):
 
     return retrieved_docs
 
-def query_by_id(id: str):
+def query_by_id(root_id: str):
+    """Return all documents who lie in the subtree rooted at `root_id`."""
+    lower = id_prefix
+    upper = id_prefix + ".\uffff"
+
     embeddings = OllamaEmbeddings(model=config["embedding_model"])
     vectordb = Chroma(
         collection_name=config["collection_name"],
@@ -28,7 +32,7 @@ def query_by_id(id: str):
         persist_directory=config["persist_dir"],
     )
 
-    raw = vectordb.get(where={"ID": id})
+    raw = vectordb.get(where={"root_id": root_id})
     return raw["documents"]
 
 # # Retrieve docs

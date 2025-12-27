@@ -27,6 +27,10 @@ def embed_df(df):
 
     It can additionally contain the following columns:
 
+        - root_id (str)
+            An identifier shared across subrows.
+            This can be used to query for an entire subtree.
+
         - hierarchy (str)
             A series of node titles going from the current node through all its ancestors (if they exist) separated by >.
     """
@@ -43,14 +47,16 @@ def embed_df(df):
 
     for index, row in df.iterrows():
         id = row["id"]
+        root_id = row["root_id"] or id
         title = row["title"]
         file_name = row["file_name"]
-        hierarchy = row["hierarchy"] or row["title"]
+        hierarchy = row["hierarchy"] or title
         texts = text_splitter.split_text(row["text"])
         texts = [texts[0]] + ["[" + hierarchy + "] " + t for t in texts[1:]]
         metadatas = [
             {
                 "ID": id,
+                "root_id": root_id,
                 "title": title,
                 "hierarchy": hierarchy,
                 "file_name": file_name,
