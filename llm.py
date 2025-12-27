@@ -1,3 +1,5 @@
+# This module takes a user query and generates a RAG context-fuelled response
+
 from langchain_ollama import ChatOllama
 from langchain.agents import create_agent
 from langchain.agents.middleware import dynamic_prompt, ModelRequest

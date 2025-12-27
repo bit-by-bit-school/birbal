@@ -1,4 +1,4 @@
-# This module takes a user query and fetches the relevant context and provides it to the LLM
+# This module queries the vector db and provides the desired document contents
 
 from langchain_ollama import OllamaEmbeddings
 from langchain_chroma import Chroma

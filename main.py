@@ -1,4 +1,4 @@
-from parsers import org_roam
+from parsers import org
 from embedding import embed_df
 from config import config
 from server import app
@@ -6,7 +6,7 @@ import uvicorn
 
 
 def load():
-    df = org_roam.org_files_to_dataframes()
+    df = org.org_files_to_dataframes()
     embed_df(df)
 
 

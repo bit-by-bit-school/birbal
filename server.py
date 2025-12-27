@@ -1,3 +1,5 @@
+# This module runs an http server for querying the llm or vector db directly
+
 from fastapi import FastAPI, Query
 from fastapi.responses import StreamingResponse, PlainTextResponse
 from llm import query_llm
