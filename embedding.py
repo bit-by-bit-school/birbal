@@ -32,7 +32,7 @@ def embed_df(df):
     """
     embeddings = OllamaEmbeddings(model=config["embedding_model"])
     vectordb = Chroma(
-        collection_name="notes",
+        collection_name=config["collection_name"],
         embedding_function=embeddings,
         persist_directory=config["persist_dir"],
     )
@@ -47,7 +47,7 @@ def embed_df(df):
         file_name = row["file_name"]
         hierarchy = row["hierarchy"] or row["title"]
         texts = text_splitter.split_text(row["text"])
-        texts = ["[" + hierarchy + "] " + text for text in texts]
+        texts = [texts[0]] + ["[" + hierarchy + "] " + t for t in texts[1:]]
         metadatas = [
             {
                 "ID": id,
@@ -57,5 +57,9 @@ def embed_df(df):
             }
             for i in range(len(texts))
         ]
-        ids = [f"{id}-{i}" for i in range(len(texts))]
+        if len(texts) == 1:
+            ids = [id]
+        else:
+            ids = [f"{id}.{i}" for i in range(len(texts))]
+
         vectordb.add_texts(texts, metadatas=metadatas, ids=ids)

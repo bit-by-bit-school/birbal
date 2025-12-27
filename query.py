@@ -8,7 +8,7 @@ from config import config
 def query_vector(query_str):
     embeddings = OllamaEmbeddings(model=config["embedding_model"])
     vectordb = Chroma(
-        collection_name="org_roam",
+        collection_name=config["collection_name"],
         embedding_function=embeddings,
         persist_directory=config["persist_dir"],
     )
@@ -20,6 +20,16 @@ def query_vector(query_str):
 
     return retrieved_docs
 
+def query_by_id(id: str):
+    embeddings = OllamaEmbeddings(model=config["embedding_model"])
+    vectordb = Chroma(
+        collection_name=config["collection_name"],
+        embedding_function=embeddings,
+        persist_directory=config["persist_dir"],
+    )
+
+    raw = vectordb.get(where={"ID": id})
+    return raw["documents"]
 
 # # Retrieve docs
 # retrieved_docs = vectordb.similarity_search_with_score(query_str, k=15)

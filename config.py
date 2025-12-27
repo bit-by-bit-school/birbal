@@ -7,6 +7,7 @@ config = {
     "port": int(os.getenv("PORT")) or 8080,
     "roam_dir": os.getenv("ROAM_DIR"),
     "persist_dir": os.getenv("PERSIST_DIR") or "./chroma/",
+    "collection_name": os.getenv("COLLECTION_NAME"),
     "embedding_model": os.getenv("EMBEDDING_MODEL"),
     "large_language_model": os.getenv("LARGE_LANGUAGE_MODEL"),
     "text_split_chunk_size": int(os.getenv("TEXT_SPLIT_CHUNK_SIZE")) or 300,

@@ -87,6 +87,7 @@ def node_to_dict(node, file_name):
 def split_node_by_org_headings(node_dict):
     root_text = node_dict["text"]
     base_hierarchy = node_dict["hierarchy"]
+    base_id = node_dict["id"]
 
     def split_recursive(text, depth, parent_titles):
         star_pattern = r"\n\*{" + str(depth) + r"}\s+"
@@ -116,8 +117,11 @@ def split_node_by_org_headings(node_dict):
             children.extend(split_recursive(part, depth + 1, extended_parents))
         return children
 
-    results = split_recursive(root_text, 1, base_hierarchy)
-    return results
+    split_nodes = split_recursive(root_text, 1, base_hierarchy)
+    for i, node in enumerate(split_nodes):
+        node["id"] = f"{base_id}.{i}"
+    
+    return split_nodes
 
 
 def format_node(node_dict):
