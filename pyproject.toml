@@ -13,5 +13,6 @@ dependencies = [
     "langchain-text-splitters>=1.1.0",
     "orgparse>=0.4.20251020",
     "pandas>=2.3.3",
+    "psycopg>=3.3.2",
     "python-dotenv>=1.2.1",
 ]
