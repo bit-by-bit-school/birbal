@@ -20,5 +20,5 @@ class ChromaStore:
         return retriever.invoke(query_str)
 
     def filter_by_metadata(self, metadata_field, metadata_value):
-        raw = self.conn.get(where={metadata_field: metadata_value})
-        return raw["documents"]
+        results = self.conn.get(where={metadata_field: metadata_value})
+        return results["documents"]
