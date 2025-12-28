@@ -16,3 +16,6 @@ dependencies = [
     "psycopg>=3.3.2",
     "python-dotenv>=1.2.1",
 ]
+[project.scripts]
+birbal-server = "birbal.cli:run_server"
+birbal-ingest = "birbal.cli:run_ingest"
