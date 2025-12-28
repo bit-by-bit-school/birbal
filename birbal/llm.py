@@ -1,10 +1,8 @@
 # This module takes a user query and generates a RAG context-fuelled response
-
-from langchain_ollama import ChatOllama
 from langchain.agents import create_agent
 from langchain.agents.middleware import dynamic_prompt, ModelRequest
+from birbal.ai import get_ai_provider
 from birbal.query import query_vector
-from birbal.config import config
 
 
 @dynamic_prompt
@@ -25,7 +23,7 @@ def prompt_with_context(request: ModelRequest) -> str:
 
 
 def query_llm(query):
-    llm = ChatOllama(model=config["large_language_model"], temperature=0, stream=True)
+    llm = get_ai_provider().get_llm()
     agent = create_agent(llm, tools=[], middleware=[prompt_with_context])
     for step in agent.stream(
         {"messages": [{"role": "user", "content": query}]},

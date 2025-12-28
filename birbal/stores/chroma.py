@@ -1,12 +1,13 @@
 from langchain_chroma import Chroma
+from birbal.stores.base import VectorStore
 from birbal.config import config
 
-class ChromaStore:
+class ChromaStore(VectorStore):
     def __init__(self, embeddings):
         self.conn = Chroma(
-            collection_name=config["collection_name"],
+            collection_name=config["chroma_collection_name"],
             embedding_function=embeddings,
-            persist_directory=config["persist_dir"],
+            persist_directory=config["chroma_dir"],
         )
 
     def add_texts(self, texts, metadatas, ids):

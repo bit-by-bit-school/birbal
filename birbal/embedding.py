@@ -1,8 +1,6 @@
 # This module converts a provided data frame into a vector embedding and stores it
-
-from langchain_ollama import OllamaEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_chroma import Chroma
+from birbal.store import get_store
 from birbal.config import config
 
 
@@ -34,12 +32,7 @@ def embed_df(df):
         - hierarchy (str)
             A series of node titles going from the current node through all its ancestors (if they exist) separated by >.
     """
-    embeddings = OllamaEmbeddings(model=config["embedding_model"])
-    vectordb = Chroma(
-        collection_name=config["collection_name"],
-        embedding_function=embeddings,
-        persist_directory=config["persist_dir"],
-    )
+    vectordb = get_store()
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=config["text_split_chunk_size"],
         chunk_overlap=config["text_split_chunk_overlap"],
