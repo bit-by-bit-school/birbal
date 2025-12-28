@@ -1,5 +1,5 @@
 from langchain_chroma import Chroma
-from config import config
+from birbal.config import config
 
 class ChromaStore:
     def __init__(self, embeddings):

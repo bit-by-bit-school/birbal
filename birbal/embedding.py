@@ -3,7 +3,7 @@
 from langchain_ollama import OllamaEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
-from config import config
+from birbal.config import config
 
 
 def embed_df(df):

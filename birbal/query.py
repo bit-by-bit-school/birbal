@@ -1,20 +1,20 @@
 # This module queries the vector db and provides the desired document contents
 
 from langchain_ollama import OllamaEmbeddings
-from models import chroma
-from config import config
+from birbal.models.chroma import ChromaStore
+from birbal.config import config
 
 
 def query_vector(query_str):
     embeddings = OllamaEmbeddings(model=config["embedding_model"])
-    vectordb = chroma.ChromaStore(embeddings)
+    vectordb = ChromaStore(embeddings)
     return vectordb.similarity_search(query_str)
 
 
 def query_by_id(root_id: str):
     """Return all documents who lie in the subtree rooted at `root_id`."""
     embeddings = OllamaEmbeddings(model=config["embedding_model"])
-    vectordb = chroma.ChromaStore(embeddings)
+    vectordb = ChromaStore(embeddings)
     return vectordb.filter_by_metadata(metadata_field="root_id", metadata_value=root_id)
 
 

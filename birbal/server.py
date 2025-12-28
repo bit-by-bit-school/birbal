@@ -2,8 +2,8 @@
 
 from fastapi import FastAPI, Query
 from fastapi.responses import StreamingResponse, PlainTextResponse
-from llm import query_llm
-from query import query_vector, query_by_id
+from birbal.llm import query_llm
+from birbal.query import query_vector, query_by_id
 
 
 app = FastAPI()

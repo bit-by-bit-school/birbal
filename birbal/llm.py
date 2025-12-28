@@ -3,8 +3,8 @@
 from langchain_ollama import ChatOllama
 from langchain.agents import create_agent
 from langchain.agents.middleware import dynamic_prompt, ModelRequest
-from config import config
-from query import query_vector
+from birbal.query import query_vector
+from birbal.config import config
 
 
 @dynamic_prompt

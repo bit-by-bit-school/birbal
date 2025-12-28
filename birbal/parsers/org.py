@@ -5,7 +5,7 @@ import glob
 import orgparse
 import pandas as pd
 import re
-from config import config
+from birbal.config import config
 
 
 def get_all_filenames_in_roam():
@@ -47,7 +47,8 @@ def extract_node_nested_body(node):
 
 def format_org_roam_links(node_body):
     """Note that this uses the descriptive title as the related note,
-    which may not be the actual note name -> possible to improve?"""
+    which may not be the actual note name -> possible to improve?
+    Need to rewrite normal org links also"""
     ORG_ROAM_LINK_RE = re.compile(r"\[\[id:([^\]]+)\]\[([^\]]+)\]\]")
 
     def rewrite_roam_link(match):
