@@ -5,6 +5,7 @@ import orgparse
 import pandas as pd
 import re
 from pathlib import Path
+from birbal.parsers.base import DocumentParser
 from birbal.config import config
 
 
@@ -134,5 +135,3 @@ class OrgParser(DocumentParser):
 
         formatted = [self._format_node(node) for node in split_nodes]
         return pd.DataFrame(formatted)
-
-

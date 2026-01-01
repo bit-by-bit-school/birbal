@@ -1,5 +1,9 @@
+import os
+import glob
+import pandas as pd
 from birbal.parsers import *
 from birbal.embedding import embed_df
+from birbal.config import config
 
 
 def get_all_filenames_in_file_dir(extension):
@@ -11,7 +15,7 @@ def get_all_filenames_in_file_dir(extension):
 
 
 def files_to_dataframe(files):
-    parser = OrgParser
+    parser = OrgParser()
     accumulated_df = pd.concat([parser.parse(file) for file in files])
     return accumulated_df
 
