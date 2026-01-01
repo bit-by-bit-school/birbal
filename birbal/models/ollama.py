@@ -9,7 +9,7 @@ class OllamaEmbeddings:
     """Model name to use."""
 
     dimensions: int | None = None
-    """Dimensions of generated embedding"""
+    """Dimensions of generated vector embedding"""
 
     _client: Client | None = None
     """The client to use for making requests."""
@@ -138,6 +138,7 @@ class OllamaProvider(AIProvider):
     def get_llm(self, *, stream=True):
         return ChatOllama(
             model=config["large_language_model"],
+            num_ctx=config["context_window_size"],
             temperature=0,
             stream=stream,
         )
