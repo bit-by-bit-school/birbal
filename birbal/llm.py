@@ -11,9 +11,9 @@ def prompt_with_context(request: ModelRequest) -> str:
     last_query = request.state["messages"][-1].text
     retrieved_docs = query_vector(last_query)
 
-    docs_content = "\n\n".join(doc.page_content for doc in retrieved_docs)
+    docs_content = "\n\n".join(retrieved_docs)
 
-    print(docs_content)
+    print(docs_content, flush=True)
     system_message = (
         "You are a retrieval-augmented assistant. Answer based ONLY on the context below, and do NOT hallucinate."
         f"\n\n{docs_content}"

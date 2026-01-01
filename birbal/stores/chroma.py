@@ -18,8 +18,8 @@ class ChromaStore(VectorStore):
             search_type="similarity",
             search_kwargs={"k": config["k_nearest_neighbors_to_retrieve"]},
         )
-        return retriever.invoke(query_str)
+        return [doc.page_content for doc in retriever.invoke(query_str)]
 
     def filter_by_metadata(self, metadata_field, metadata_value):
         results = self.conn.get(where={metadata_field: metadata_value})
-        return results["documents"]
+        return [doc.page_content for doc in results["documents"]]
