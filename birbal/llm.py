@@ -25,10 +25,9 @@ def prompt_with_context(request: ModelRequest) -> str:
 def query_llm(query):
     llm = get_ai_provider().get_llm()
     agent = create_agent(llm, tools=[], middleware=[prompt_with_context])
-    for step in agent.stream(
+    for chunk, metadata in agent.stream(
         {"messages": [{"role": "user", "content": query}]},
-        stream_mode="values",
+        stream_mode="messages",
     ):
-        msg = step["messages"][-1]
-        if msg.type == "ai":
-            yield msg.content
+        if hasattr(chunk, "content"):
+            yield chunk.content

@@ -36,7 +36,6 @@ def embed_df(df):
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=config["text_split_chunk_size"],
         chunk_overlap=config["text_split_chunk_overlap"],
-        separators=["\n\n"]
     )
 
     for index, row in df.iterrows():
