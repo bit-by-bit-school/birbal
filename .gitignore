@@ -9,6 +9,9 @@ wheels/
 # Mac OS
 .DS_Store
 
+# IDE
+.vscode
+
 # Virtual environments
 .venv
 .env

@@ -15,7 +15,8 @@ def prompt_with_context(request: ModelRequest) -> str:
 
     print(docs_content, flush=True)
     system_message = (
-        "You are a retrieval-augmented assistant. Answer based ONLY on the context below, and do NOT hallucinate."
+        "You are a retrieval-augmented assistant. Retrieve only, no guessing. If the answer is not in the context, say you don't know."
+        "Give more details. Cite the source context files used at the end."
         f"\n\n{docs_content}"
     )
 
