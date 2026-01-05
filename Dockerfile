@@ -1,5 +1,7 @@
 FROM python:3.12-slim
 
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y \
@@ -8,16 +10,13 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install uv
-RUN curl -Ls https://astral.sh/uv/install.sh | sh
-ENV PATH="/root/.local/bin:/root/.cargo/bin:$PATH"
-
-# Copy dependency graph
-COPY pyproject.toml uv.lock ./
-
-
-# Install deps
-RUN uv pip compile pyproject.toml -o requirements.txt
-RUN uv pip sync --system requirements.txt
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --frozen --no-install-project --no-dev
 
 COPY . .
+
+RUN uv sync --frozen --no-dev
+
+ENV PATH="/app/.venv/bin:$PATH"

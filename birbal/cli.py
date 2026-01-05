@@ -5,7 +5,9 @@ import uvicorn
 
 
 def run_ingest():
+    print("Starting ingestion...")
     ingest()
+    print("Ingestion complete.")
 
 
 def run_server():
