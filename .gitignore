@@ -15,6 +15,3 @@ wheels/
 # Virtual environments
 .venv
 .env
-
-# Chroma data
-chroma/

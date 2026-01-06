@@ -29,8 +29,6 @@ config = {
     "k_nearest_neighbors_to_retrieve": int(
         os.getenv("K_NEAREST_NEIGHBORS_TO_RETRIEVE", 7)
     ),
-    "chroma_dir": os.getenv("CHROMA_DIR", "./chroma/"),
-    "chroma_collection_name": os.getenv("CHROMA_COLLECTION_NAME", "notes"),
     "postgres_dsn": _pg_dsn(),
     "migrations_dir": Path(os.getenv("MIGRATIONS_DIR", "/birbal/migrations")).resolve()
 }

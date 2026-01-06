@@ -1,4 +1,4 @@
-from birbal.stores import PostgresStore, ChromaStore
+from birbal.stores import PostgresStore
 from birbal.ai import get_ai_provider
 from birbal.config import config
 
@@ -10,8 +10,5 @@ def get_store():
     if _store is None:
         ai = get_ai_provider()
         embeddings = ai.get_embeddings()
-        if config["vector_backend"] == "chroma":
-            _store = ChromaStore(embeddings)
-        else:
-            _store = PostgresStore(embeddings)
+        _store = PostgresStore(embeddings)
     return _store

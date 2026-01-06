@@ -1,7 +1,7 @@
 # Birbal — Personal Knowledge Base Search Engine
 
 Birbal is a hybrid semantic + lexical search engine for your personal notes.
-It uses Ollama for local LLM inference and ChromaDB or PostgreSQL + pgvector for high-quality retrieval.
+It uses Ollama for local LLM inference and PostgreSQL + pgvector for high-quality retrieval.
 
 ---
 
