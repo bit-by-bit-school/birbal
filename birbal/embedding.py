@@ -70,7 +70,7 @@ def _batch_embed_chunks(chunks, embedder):
     texts = [c["content"] for c in chunks]
     batches = [texts[i : i + batch_size] for i in range(0, len(texts), batch_size)]
 
-    print(f"Embedding {len(texts)} chunks (Batch size: {batch_size})...")
+    print(f"Embedding {len(texts)} chunks (Batch size: {batch_size})...", flush=True)
 
     all_embeddings = [
         emb for batch in batches for emb in embedder.embed_documents(batch)

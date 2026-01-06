@@ -1,4 +1,4 @@
-# This module syncs store state to file_dir state
+# This module syncs store state to source state
 import os
 import glob
 from pathlib import Path
@@ -11,13 +11,13 @@ from birbal.store import get_store
 from birbal.config import config
 
 
-def ingest_files(paths, store):
+def _ingest_files(paths, store):
     parser = OrgParser()
     accumulated_df = pd.concat([parser.parse(path) for path in paths])
     ingest_dataframe(accumulated_df)
 
 
-def delete_orphaned_nodes(db_stats, local_stats, store):
+def _delete_orphaned_nodes(db_stats, local_stats, store):
     db_filenames = {s.file_name for s in db_stats}
     local_filenames = {s.location for s in local_stats}
     orphaned = db_filenames - local_filenames
@@ -27,7 +27,7 @@ def delete_orphaned_nodes(db_stats, local_stats, store):
         store.delete_by_filenames(orphaned)
 
 
-def update_stale_nodes(db_stats, local_stats, store):
+def _update_stale_nodes(db_stats, local_stats, store):
     db_map = {s.file_name: s for s in db_stats}
     local_map = {s.location: s for s in local_stats}
 
@@ -40,18 +40,29 @@ def update_stale_nodes(db_stats, local_stats, store):
     if stale:
         print(f"Re-indexing {len(stale)} modified files", flush=True)
         store.delete_by_filenames(stale)
-        ingest_files(stale, store)
+        _ingest_files(stale, store)
         # could wrap in transaction
 
 
-def ingest_new_files(db_stats, local_stats, store):
+def _ingest_new_files(db_stats, local_stats, store):
     db_filenames = {s.file_name for s in db_stats}
     local_filenames = {s.location for s in local_stats}
     new = local_filenames - db_filenames
 
     if new:
         print(f"Ingesting {len(new)} files", flush=True)
-        ingest_files(new, store)
+        _ingest_files(new, store)
+
+
+def sync_file(path):
+    store = get_store()
+    store.delete_by_filenames([path])
+    _ingest_files([path], store)
+    
+
+def delete_file_from_store(path):
+    store = get_store()
+    store.delete_by_filenames([path])
 
 
 def sync_store():
@@ -61,7 +72,7 @@ def sync_store():
     local_stats = fs.get_source_stats("org")
 
     print("Syncing...", flush=True)
-    delete_orphaned_nodes(db_stats, local_stats, db)
-    update_stale_nodes(db_stats, local_stats, db)
-    ingest_new_files(db_stats, local_stats, db)
+    _delete_orphaned_nodes(db_stats, local_stats, db)
+    _update_stale_nodes(db_stats, local_stats, db)
+    _ingest_new_files(db_stats, local_stats, db)
     print("Sync complete.", flush=True)

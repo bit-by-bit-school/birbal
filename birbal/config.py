@@ -26,6 +26,7 @@ config = {
     "text_split_chunk_size": int(os.getenv("TEXT_SPLIT_CHUNK_SIZE", 300)),
     "text_split_chunk_overlap": int(os.getenv("TEXT_SPLIT_CHUNK_OVERLAP", 0)),
     "embedding_batch_size": int(os.getenv("EMBEDDING_BATCH_SIZE", 100)),
+    "sync_interval": int(os.getenv("SYNC_INTERVAL", 1800)),
     "context_window_size": int(os.getenv("CONTEXT_WINDOW_SIZE", 2048)),
     "k_nearest_neighbors_to_retrieve": int(
         os.getenv("K_NEAREST_NEIGHBORS_TO_RETRIEVE", 7)
