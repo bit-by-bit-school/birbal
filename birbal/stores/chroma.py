@@ -10,7 +10,7 @@ class ChromaStore(VectorStore):
             persist_directory=config["chroma_dir"],
         )
 
-    def add_texts(self, texts, metadatas, ids):
+    def add_files(self, texts, metadatas, ids):
         self.conn.add_texts(texts, metadatas=metadatas, ids=ids)
 
     def similarity_search(self, query_str):

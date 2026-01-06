@@ -12,6 +12,7 @@ services:
     volumes:
       - .:/app
       - /app/.venv
+      - ${FILE_DIR}:${FILE_DIR}:ro
       - chroma_data:/chroma
     depends_on:
       - db

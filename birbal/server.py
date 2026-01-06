@@ -2,12 +2,12 @@
 
 from fastapi import FastAPI, Query
 from fastapi.responses import StreamingResponse, PlainTextResponse
+from birbal.sync import sync_store
 from birbal.llm import query_llm
 from birbal.query import query_vector, query_by_id
 
-
 app = FastAPI()
-
+sync_store()
 
 @app.get("/query")
 def query(q: str = Query(..., min_length=1)):

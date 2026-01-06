@@ -15,8 +15,7 @@ CREATE TABLE nodes (
     embedding halfvec(%(vector_dims)s),
 
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    deleted_at  TIMESTAMPTZ
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX nodes_tsv_idx   ON nodes USING GIN(content_tsv);

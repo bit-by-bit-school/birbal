@@ -61,4 +61,4 @@ def embed_df(df):
         else:
             ids = [f"{id}.{i}" for i in range(len(texts))]
 
-        vectordb.add_texts(texts, metadatas=metadatas, ids=ids)
+        vectordb.add_files(texts, metadatas=metadatas, ids=ids)

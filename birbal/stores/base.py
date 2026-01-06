@@ -1,5 +1,13 @@
+from dataclasses import dataclass
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Set
+from datetime import datetime
+
+
+@dataclass(frozen=True)
+class FileStat:
+    file_name: str
+    last_indexed_at: datetime
 
 
 class VectorStore(ABC):
@@ -8,9 +16,15 @@ class VectorStore(ABC):
     """
 
     @abstractmethod
-    def add_texts(
+    def add_files(
         self, texts: List[str], metadatas: List[dict], ids: List[str]
     ) -> None: ...
+
+    @abstractmethod
+    def delete_by_filenames(self, filenames: Set[str]) -> None: ...
+
+    @abstractmethod
+    def get_file_stats(self) -> List[FileStat]: ...
 
     @abstractmethod
     def similarity_search(self, query_str: str) -> List[str]: ...
