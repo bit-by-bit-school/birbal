@@ -130,7 +130,7 @@ class OllamaEmbeddings:
 
 
 class OllamaProvider(AIProvider):
-    def get_embeddings(self):
+    def get_embedder(self):
         return OllamaEmbeddings(
             model=config["embedding_model"], dimensions=config["vector_dims"]
         )

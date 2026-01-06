@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
-from typing import List, Set
+from typing import List, Set, Dict, Any
 from datetime import datetime
 
 
@@ -16,8 +16,8 @@ class VectorStore(ABC):
     """
 
     @abstractmethod
-    def add_files(
-        self, texts: List[str], metadatas: List[dict], ids: List[str]
+    def upsert_nodes(
+        self, nodes: List[Dict[str, Any]]
     ) -> None: ...
 
     @abstractmethod

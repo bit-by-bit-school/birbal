@@ -16,18 +16,6 @@ services:
     depends_on:
       - db
 
-  ingest:
-    build: .
-    profiles: ["ingest"]
-    command: python -m birbal.ingest
-    env_file:
-      - .env
-    volumes:
-      - /app/.venv
-      - ${FILE_DIR}:${FILE_DIR}:ro
-    depends_on:
-      - db
-
   db:
     image: pgvector/pgvector:pg16
     env_file:

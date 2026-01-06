@@ -9,6 +9,6 @@ def get_store():
     global _store
     if _store is None:
         ai = get_ai_provider()
-        embeddings = ai.get_embeddings()
-        _store = PostgresStore(embeddings)
+        embedder = ai.get_embedder()
+        _store = PostgresStore(embedder)
     return _store

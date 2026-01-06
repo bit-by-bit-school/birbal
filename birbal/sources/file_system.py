@@ -1,5 +1,5 @@
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from birbal.sources.base import Source, SourceStat
 from birbal.config import config
 
@@ -14,7 +14,7 @@ class FileSystemSource(Source):
         return [
             SourceStat(
                 location = str(path),
-                last_modified_at = datetime.fromtimestamp(path.stat().st_mtime),
+                last_modified_at = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc),
             )
             for path in files
         ]

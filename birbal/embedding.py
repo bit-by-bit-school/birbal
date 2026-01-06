@@ -1,18 +1,93 @@
 # This module converts a provided data frame into a vector embedding and stores it
+import pandas as pd
+import numpy as np
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from birbal.ai import get_ai_provider
 from birbal.store import get_store
 from birbal.config import config
 
 
-def embed_df(df):
+def _apply_hierarchy_context(splits: list[str], hierarchy: str) -> list[str]:
+    """Prefixes all splits after the first with the hierarchy context."""
+    if not splits:
+        return []
+    if len(splits) == 1:
+        return splits
+    return [splits[0]] + [f"[{hierarchy}] {t}" for t in splits[1:]]
+
+
+def _create_chunk_id(base_id, index, num_chunks):
+    return base_id if num_chunks == 1 else f"{base_id}.{index}"
+
+
+def _create_metadata(row: dict) -> dict:
+    """Constructs metadata from row data."""
+    return {
+        "root_id": row.get("root_id") or row.get("id"),
+        "file_name": row["file_name"],
+        "hierarchy": row.get("hierarchy") or row.get("title", ""),
+        "kind": row.get("kind"),
+    }
+
+
+def _create_chunk(text, index, num_chunks, row):
+    metadata = _create_metadata(row)
+    return {
+        "id": _create_chunk_id(row.get("id"), index, num_chunks),
+        "content": text,
+        **metadata,
+    }
+
+
+def _split_row(row, splitter):
+    """Splits a single row into a list of chunks."""
+    hierarchy = row.get("hierarchy") or row.get("title", "")
+    raw_splits = splitter.split_text(row.get("text"))
+    processed_texts = _apply_hierarchy_context(raw_splits, hierarchy)
+
+    return [
+        _create_chunk(text, i, len(processed_texts), row)
+        for i, text in enumerate(processed_texts)
+    ]
+
+
+def _prepare_chunks(df):
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=config["text_split_chunk_size"],
+        chunk_overlap=config["text_split_chunk_overlap"],
+    )
+
+    return [
+        chunk
+        for _, row in df.iterrows()
+        for chunk in _split_row(row.to_dict(), text_splitter)
+    ]
+
+
+def _batch_embed_chunks(chunks, embedder):
+    """Chunks is a list of dicts. We add an 'embedding' key to each."""
+    batch_size = config["embedding_batch_size"]
+    texts = [c["content"] for c in chunks]
+    batches = [texts[i : i + batch_size] for i in range(0, len(texts), batch_size)]
+
+    print(f"Embedding {len(texts)} chunks (Batch size: {batch_size})...")
+
+    all_embeddings = [
+        emb for batch in batches for emb in embedder.embed_documents(batch)
+    ]
+
+    return [{**chunk, "embedding": emb} for chunk, emb in zip(chunks, all_embeddings)]
+
+
+def ingest_dataframe(df):
     """
-    Embed a Pandas DataFrame into a Chroma vector store.
+    Embed a Pandas DataFrame into a vector store.
 
     The input DataFrame MUST contain the following columns:
 
         - id (str)
             A unique, stable identifier for each row.
-            This value is used as the Chroma document ID and MUST be unique across all rows.
+            This value is used as the document ID and MUST be unique across all rows.
 
         - text (str)
             The full text content that will be embedded and indexed.
@@ -32,33 +107,8 @@ def embed_df(df):
         - hierarchy (str)
             A series of node titles going from the current node through all its ancestors (if they exist) separated by >.
     """
+    chunks = _prepare_chunks(df)
+    embedder = get_ai_provider().get_embedder()
+    embedded_chunks = _batch_embed_chunks(chunks, embedder)
     vectordb = get_store()
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=config["text_split_chunk_size"],
-        chunk_overlap=config["text_split_chunk_overlap"],
-    )
-
-    for index, row in df.iterrows():
-        id = row["id"]
-        root_id = row["root_id"] or id
-        title = row["title"]
-        file_name = row["file_name"]
-        hierarchy = row["hierarchy"] or title
-        texts = text_splitter.split_text(row["text"])
-        texts = [texts[0]] + ["[" + hierarchy + "] " + t for t in texts[1:]]
-        metadatas = [
-            {
-                "ID": id,
-                "root_id": root_id,
-                "title": title,
-                "hierarchy": hierarchy,
-                "file_name": file_name,
-            }
-            for i in range(len(texts))
-        ]
-        if len(texts) == 1:
-            ids = [id]
-        else:
-            ids = [f"{id}.{i}" for i in range(len(texts))]
-
-        vectordb.add_files(texts, metadatas=metadatas, ids=ids)
+    vectordb.upsert_nodes(embedded_chunks)

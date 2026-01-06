@@ -17,4 +17,3 @@ dependencies = [
 ]
 [project.scripts]
 birbal-server = "birbal.cli:run_server"
-birbal-ingest = "birbal.cli:run_ingest"

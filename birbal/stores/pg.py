@@ -1,5 +1,6 @@
 #
 
+from datetime import timezone
 import psycopg
 from psycopg.rows import dict_row
 from birbal.stores.base import VectorStore, FileStat
@@ -7,8 +8,8 @@ from birbal.config import config
 
 
 class PostgresStore(VectorStore):
-    def __init__(self, embeddings):
-        self.embeddings = embeddings
+    def __init__(self, embedder):
+        self.embedder = embedder
         self.conn = psycopg.connect(config["postgres_dsn"])
         self._migrate()
 
@@ -44,31 +45,17 @@ class PostgresStore(VectorStore):
                 )
                 self.conn.commit()
 
-    def add_files(self, texts, metadatas, ids):
+    def upsert_nodes(self, nodes: list[dict]):
+        query = """
+        INSERT INTO nodes (id, root_id, content, embedding, file_name, hierarchy, kind, updated_at)
+        VALUES (%(id)s, %(root_id)s, %(content)s, %(embedding)s, %(file_name)s, %(hierarchy)s, %(kind)s, NOW())
+        ON CONFLICT (id) DO UPDATE SET
+            content = EXCLUDED.content,
+            embedding = EXCLUDED.embedding,
+            updated_at = NOW();
+        """
         with self.conn.cursor() as cur:
-            for text, meta, node_id in zip(texts, metadatas, ids):
-                embedding = self.embeddings.embed_query(text)
-
-                cur.execute(
-                    """
-                INSERT INTO nodes (id, root_id, hierarchy, file_name, kind, content, embedding)
-                VALUES (%(node_id)s, %(root_id)s, %(hierarchy)s, %(file_name)s, %(kind)s, %(content)s, %(embedding)s)
-                ON CONFLICT (id) DO UPDATE SET
-                    content = EXCLUDED.content,
-                    embedding = EXCLUDED.embedding,
-                    updated_at = NOW();
-                """,
-                    {
-                        "node_id": node_id,
-                        "root_id": meta.get("root_id"),
-                        "hierarchy": meta.get("hierarchy"),
-                        "file_name": meta.get("file_name"),
-                        "kind": meta.get("kind"),
-                        "content": text,
-                        "embedding": embedding,
-                    },
-                )
-
+            cur.executemany(query, nodes)
         self.conn.commit()
 
     def delete_by_filenames(self, filenames):
@@ -90,7 +77,7 @@ class PostgresStore(VectorStore):
                 """,
             )
             return [
-                FileStat(file_name=fname, last_indexed_at=ts)
+                FileStat(file_name=fname, last_indexed_at=ts.astimezone(timezone.utc))
                 for fname, ts in cur.fetchall()
             ]
 
@@ -149,7 +136,7 @@ class PostgresStore(VectorStore):
             return cur.fetchall()
 
     def similarity_search(self, query_str):
-        query_embedding = self.embeddings.embed_query(query_str)
+        query_embedding = self.embedder.embed_query(query_str)
         k = config["k_nearest_neighbors_to_retrieve"]
         results = self._hybrid_query(query_str, query_embedding, k)
         return [row["content"] for row in results]

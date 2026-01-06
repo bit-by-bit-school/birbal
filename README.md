@@ -59,18 +59,6 @@ http://localhost:8080
 
 ---
 
-### Ingest your notes
-
-To load your notes into the database:
-
-```bash
-docker compose --profile ingest up ingest
-```
-
-This reads your notes from `FILE_DIR` and builds the search index.
-
----
-
 ## 3. Run without Docker
 
 ### Install dependencies
@@ -91,14 +79,6 @@ Server runs at:
 
 ```
 http://localhost:8080
-```
-
----
-
-### Ingest your notes
-
-```bash
-birbal-ingest
 ```
 
 ---

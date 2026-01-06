@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import pandas as pd
 from birbal.parsers import *
 from birbal.sources import *
-from birbal.embedding import embed_df
+from birbal.embedding import ingest_dataframe
 from birbal.store import get_store
 from birbal.config import config
 
@@ -14,7 +14,7 @@ from birbal.config import config
 def ingest_files(paths, store):
     parser = OrgParser()
     accumulated_df = pd.concat([parser.parse(path) for path in paths])
-    embed_df(accumulated_df)
+    ingest_dataframe(accumulated_df)
 
 
 def delete_orphaned_nodes(db_stats, local_stats, store):
