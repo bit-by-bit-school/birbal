@@ -135,7 +135,7 @@ class OllamaProvider(AIProvider):
             model=config["embedding_model"], dimensions=config["vector_dims"]
         )
 
-    def get_llm(self, *, stream=True):
+    def get_llm(self, stream=True):
         return ChatOllama(
             model=config["large_language_model"],
             num_ctx=config["context_window_size"],

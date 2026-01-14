@@ -6,20 +6,24 @@ from contextlib import asynccontextmanager
 from birbal.config import config
 from birbal.llm import query_llm
 from birbal.query import query_vector, query_by_id
-from birbal.sync import sync_store
-from birbal.watcher import watch_files
+from birbal.sync import sync_store, sync_file, delete_file_from_store
+from birbal.sources import *
 
 
 async def _safety_net_poller():
     while True:
         print("Running periodic sync...", flush=True)
-        sync_store()
+        await asyncio.to_thread(sync_store)
+        print("Periodic sync complete.", flush=True)
         await asyncio.sleep(config("sync_interval"))
 
 
 @asynccontextmanager
 async def _lifespan(app: FastAPI):
-    watcher_task = asyncio.create_task(watch_files())
+    fs = FileSystemSource("org")
+    watcher_task = asyncio.create_task(
+        fs.watch(sync_file, delete_file_from_store)
+    )
     poller_task = asyncio.create_task(_safety_net_poller())
 
     yield

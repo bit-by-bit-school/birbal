@@ -1,8 +1,4 @@
 # This module syncs store state to source state
-import os
-import glob
-from pathlib import Path
-from dataclasses import dataclass
 import pandas as pd
 from birbal.parsers import *
 from birbal.sources import *
@@ -67,9 +63,9 @@ def delete_file_from_store(path):
 
 def sync_store():
     db = get_store()
-    fs = FileSystemSource()
+    fs = FileSystemSource("org")
     db_stats = db.get_file_stats()
-    local_stats = fs.get_source_stats("org")
+    local_stats = fs.get_source_stats()
 
     print("Syncing...", flush=True)
     _delete_orphaned_nodes(db_stats, local_stats, db)
