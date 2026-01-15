@@ -1,0 +1,20 @@
+# Python junk
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Project junk
+.git/
+.gitignore
+.dockerignore
+docker-compose.yaml
+README.md
+
+# Secrets and local config
+.env
+config.yaml
+*.log

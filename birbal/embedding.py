@@ -2,7 +2,7 @@
 import pandas as pd
 import numpy as np
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from birbal.ai import get_ai_provider
+from birbal.ai import get_embedder
 from birbal.store import get_store
 from birbal.config import config
 
@@ -108,7 +108,7 @@ def ingest_dataframe(df):
             A series of node titles going from the current node through all its ancestors (if they exist) separated by >.
     """
     chunks = _prepare_chunks(df)
-    embedder = get_ai_provider().get_embedder()
+    embedder = get_embedder()
     embedded_chunks = _batch_embed_chunks(chunks, embedder)
     vectordb = get_store()
     vectordb.upsert_nodes(embedded_chunks)

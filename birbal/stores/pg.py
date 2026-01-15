@@ -38,7 +38,7 @@ class PostgresStore(VectorStore):
 
                 sql = file.read_text()
                 print(f"Applying migration {file.name}", flush=True)
-                cur.execute(sql, config)
+                cur.execute(sql)
                 cur.execute(
                     "INSERT INTO schema_migrations (filename) VALUES (%s)",
                     (file.name,),

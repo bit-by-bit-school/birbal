@@ -81,7 +81,7 @@ class OllamaEmbeddings:
         self.dimensions = dimensions
         self.options = kwargs
 
-    def embed_documents(self, texts: list[str]) -> list[list[float]]:
+    def embed_documents(self, texts):
         if not self.client:
             msg = (
                 "Ollama client is not initialized. "
@@ -98,7 +98,7 @@ class OllamaEmbeddings:
 
         return response["embeddings"]
 
-    def embed_query(self, text: str) -> list[float]:
+    def embed_query(self, text):
         return self.embed_documents([text])[0]
 
 
@@ -296,16 +296,7 @@ class OllamaLLM:
         self.stream = stream
         self.options = kwargs
 
-    def bind(self, **kwargs):
-        settings = {**self.options, **kwargs}
-        return OllamaLLM(
-            model=self.model, 
-            host=str(self.client._client.base_url), 
-            stream=self.stream, 
-            **settings
-        )
-
-    def invoke(self, messages: list[dict]):
+    def invoke(self, messages):
         """
         Note: Native Ollama uses [{'role': 'user', 'content': '...'}] format.
         """
@@ -325,16 +316,16 @@ class OllamaLLM:
 class OllamaProvider(AIProvider):
     def get_embedder(self):
         return OllamaEmbeddings(
-            host=config["ollama_host"],
-            model=config["embedding_model"],
+            host=config["embed_host"],
+            model=config["embed_model"],
             dimensions=config["vector_dims"],
         )
 
-    def get_llm(self, stream=True):
+    def get_llm(self):
         return OllamaLLM(
-            host=config["ollama_host"],
+            host=config["llm_host"],
             model=config["large_language_model"],
-            stream=stream,
+            stream=True,
             num_ctx=config["context_window_size"],
             temperature=0,
         )

@@ -3,11 +3,11 @@ from fastapi import FastAPI, Query
 from fastapi.responses import StreamingResponse, PlainTextResponse
 import asyncio
 from contextlib import asynccontextmanager
-from birbal.config import config
-from birbal.llm import query_llm
-from birbal.query import query_vector, query_by_id
-from birbal.sync import sync_store, sync_file, delete_file_from_store
 from birbal.sources import *
+from birbal.ai import query_llm
+from birbal.store import query_vector, query_by_id
+from birbal.sync import sync_store, sync_file, delete_file_from_store
+from birbal.config import config
 
 
 async def _safety_net_poller():
@@ -21,9 +21,7 @@ async def _safety_net_poller():
 @asynccontextmanager
 async def _lifespan(app: FastAPI):
     fs = FileSystemSource("org")
-    watcher_task = asyncio.create_task(
-        fs.watch(sync_file, delete_file_from_store)
-    )
+    watcher_task = asyncio.create_task(fs.watch(sync_file, delete_file_from_store))
     poller_task = asyncio.create_task(_safety_net_poller())
 
     yield
@@ -35,10 +33,17 @@ async def _lifespan(app: FastAPI):
 app = FastAPI(lifespan=_lifespan)
 
 
+def run_query(query):
+    retrieved_docs = query_vector(query)
+    docs_content = "\n\n".join(retrieved_docs)
+    print(docs_content, flush=True)
+    query_llm(query, docs_content)
+
+
 @app.get("/query")
 def query(q: str = Query(..., min_length=1)):
     return StreamingResponse(
-        query_llm(q),
+        run_query(q),
         media_type="text/plain",
     )
 
