@@ -3,17 +3,20 @@ name = "birbal"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.13"
 dependencies = [
-    "fastapi>=0.127.0",
-    "langchain>=1.2.0",
-    "langchain-ollama>=1.0.1",
+    "fastapi[standard]>=0.127.0",
+    "httpx>=0.28.1",
     "langchain-text-splitters>=1.1.0",
+    "mlx-lm>=0.29.1",
     "ollama>=0.6.1",
+    "openai>=2.15.0",
     "orgparse>=0.4.20251020",
     "pandas>=2.3.3",
     "psycopg>=3.3.2",
     "python-dotenv>=1.2.1",
+    "trafilatura>=2.0.0",
+    "ultimate-sitemap-parser>=1.6.0",
     "watchfiles>=1.1.1",
 ]
 [project.scripts]

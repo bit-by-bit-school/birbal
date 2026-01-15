@@ -37,7 +37,7 @@ def run_query(query):
     retrieved_docs = query_vector(query)
     docs_content = "\n\n".join(retrieved_docs)
     print(docs_content, flush=True)
-    query_llm(query, docs_content)
+    yield from query_llm(query, docs_content)
 
 
 @app.get("/query")

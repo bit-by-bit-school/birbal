@@ -8,9 +8,12 @@ from birbal.config import config
 
 
 def _ingest_files(paths, store):
-    parser = OrgParser()
-    accumulated_df = pd.concat([parser.parse(path) for path in paths])
-    ingest_dataframe(accumulated_df)
+    try:
+        parser = OrgParser()
+        accumulated_df = pd.concat([parser.parse_from_path(path) for path in paths])
+        ingest_dataframe(accumulated_df)
+    except Exception as e:
+        print(f"Error ingesting files: {e}")
 
 
 def _delete_orphaned_nodes(db_stats, local_stats, store):

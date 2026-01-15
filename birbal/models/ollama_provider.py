@@ -1,9 +1,9 @@
 from ollama import Client
-from birbal.models.base import AIProvider
+from birbal.models.base import AIProvider, Embedder, LLM
 from birbal.config import config
 
 
-class OllamaEmbeddings:
+class OllamaEmbedder(Embedder):
     model: str
     """Model name to use."""
 
@@ -102,7 +102,7 @@ class OllamaEmbeddings:
         return self.embed_documents([text])[0]
 
 
-class OllamaLLM:
+class OllamaLLM(LLM):
     model: str
     """Model name to use."""
 
@@ -127,8 +127,6 @@ class OllamaLLM:
 
     validate_model_on_init: bool = False
     """Whether to validate the model exists in Ollama locally on initialization.
-
-    !!! version-added "Added in `langchain-ollama` 0.3.4"
     """
 
     mirostat: int | None = None
@@ -315,7 +313,7 @@ class OllamaLLM:
 
 class OllamaProvider(AIProvider):
     def get_embedder(self):
-        return OllamaEmbeddings(
+        return OllamaEmbedder(
             host=config["embed_host"],
             model=config["embed_model"],
             dimensions=config["vector_dims"],

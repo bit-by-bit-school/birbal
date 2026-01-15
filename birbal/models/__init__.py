@@ -1,5 +1,4 @@
-from .ollama import OllamaProvider
-from .mlx import MlxProvider
-from .openai import OpenAiProvider
+from .ollama_provider import OllamaProvider
+from .openai_provider import OpenAiProvider
 
-__all__ = ["OllamaProvider", "MlxProvider", "OpenAiProvider"]
+__all__ = ["OllamaProvider", "OpenAiProvider"]
