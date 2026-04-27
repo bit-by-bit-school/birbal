@@ -26,7 +26,7 @@ class FileSystemSource(Source):
         ]
 
     async def watch(self, upsert_fn, delete_fn):
-        print(f"Watcher started on {self.source_dir}", flush=True)
+        print(f"Watcher started on {self.source_dir}" )
 
         async for changes in awatch(self.source_dir):
             for change_type, path in changes:
@@ -34,9 +34,9 @@ class FileSystemSource(Source):
                     continue
 
                 if change_type in (Change.added, Change.modified):
-                    print(f"Watcher detected update: {path}", flush=True)
+                    print(f"Watcher detected update: {path}" )
                     upsert_fn(path)
 
                 elif change_type == Change.deleted:
-                    print(f"Watcher detected deletion: {path}", flush=True)
+                    print(f"Watcher detected deletion: {path}" )
                     delete_fn(path)

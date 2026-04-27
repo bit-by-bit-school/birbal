@@ -22,7 +22,7 @@ def _delete_orphaned_nodes(db_stats, local_stats, store):
     orphaned = db_filenames - local_filenames
 
     if orphaned:
-        print(f"Deleting {len(orphaned)} nodes for missing files", flush=True)
+        print(f"Deleting {len(orphaned)} nodes for missing files" )
         store.delete_by_filenames(orphaned)
 
 
@@ -37,7 +37,7 @@ def _update_stale_nodes(db_stats, local_stats, store):
     }
 
     if stale:
-        print(f"Re-indexing {len(stale)} modified files", flush=True)
+        print(f"Re-indexing {len(stale)} modified files" )
         store.delete_by_filenames(stale)
         _ingest_files(stale, store)
         # could wrap in transaction
@@ -49,7 +49,7 @@ def _ingest_new_files(db_stats, local_stats, store):
     new = local_filenames - db_filenames
 
     if new:
-        print(f"Ingesting {len(new)} files", flush=True)
+        print(f"Ingesting {len(new)} files" )
         _ingest_files(new, store)
 
 
@@ -70,8 +70,8 @@ def sync_store():
     db_stats = db.get_file_stats()
     local_stats = fs.get_source_stats()
 
-    print("Syncing...", flush=True)
+    print("Syncing..." )
     _delete_orphaned_nodes(db_stats, local_stats, db)
     _update_stale_nodes(db_stats, local_stats, db)
     _ingest_new_files(db_stats, local_stats, db)
-    print("Sync complete.", flush=True)
+    print("Sync complete." )

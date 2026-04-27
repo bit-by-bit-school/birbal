@@ -1,5 +1,4 @@
 #
-
 from datetime import timezone
 import psycopg
 from psycopg.rows import dict_row
@@ -14,6 +13,8 @@ class PostgresStore(VectorStore):
         self._migrate()
 
     def _migrate(self):
+        print("Running database migrations..." )
+
         migrations_dir = config["migrations_dir"]
 
         with self.conn.cursor() as cur:
@@ -37,13 +38,15 @@ class PostgresStore(VectorStore):
                     continue
 
                 sql = file.read_text()
-                print(f"Applying migration {file.name}", flush=True)
+                print(f"Applying migration {file.name}" )
                 cur.execute(sql)
                 cur.execute(
                     "INSERT INTO schema_migrations (filename) VALUES (%s)",
                     (file.name,),
                 )
                 self.conn.commit()
+
+        print("Migrations complete." )
 
     def upsert_nodes(self, nodes: list[dict]):
         query = """
@@ -84,6 +87,7 @@ class PostgresStore(VectorStore):
     def _hybrid_query(self, query_text, query_embedding, k):
         reciprocal_rank_fusion_smoothing = 50
         lexical_weight = 1
+        documents_per_search = k * 2
         # same as supabase https://supabase.com/docs/guides/ai/hybrid-search
 
         with self.conn.cursor(row_factory=dict_row) as cur:
@@ -100,7 +104,7 @@ class PostgresStore(VectorStore):
                     FROM nodes
                     WHERE content_tsv @@ websearch_to_tsquery('english', %(q)s)
                     ORDER BY rank_ix
-                    LIMIT %(k)s
+                    LIMIT %(d)s
                 ),
                 semantic AS (
                     SELECT
@@ -112,7 +116,7 @@ class PostgresStore(VectorStore):
                         ) AS rank_ix
                     FROM nodes
                     ORDER BY rank_ix
-                    LIMIT %(k)s
+                    LIMIT %(d)s
                 )
                 SELECT COALESCE(ft.file_name, sem.file_name) AS filename, 
                        COALESCE(ft.content, sem.content) AS content
@@ -128,6 +132,7 @@ class PostgresStore(VectorStore):
                     "q": query_text,
                     "emb": query_embedding,
                     "k": k,
+                    "d": documents_per_search,
                     "lw": lexical_weight,
                     "rrf": reciprocal_rank_fusion_smoothing,
                 },
