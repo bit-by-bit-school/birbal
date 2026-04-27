@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 import pandas as pd
-from pathlib import Path
 
 class DocumentParser(ABC):
     """
@@ -8,5 +7,9 @@ class DocumentParser(ABC):
     """
 
     @abstractmethod
-    def parse(self, path: Path) -> pd.DataFrame:
+    def parse_from_path(self, path: str) -> pd.DataFrame:
+        ...
+
+    @abstractmethod
+    def parse_from_data(self, data: str) -> pd.DataFrame:
         ...

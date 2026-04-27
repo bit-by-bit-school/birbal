@@ -76,6 +76,7 @@ class OrgParser(DocumentParser):
             "title": self._extract_title(node),
             "hierarchy": self._build_node_hierarchy(node),
             "text": self._extract_node_nested_body_exclusive(node),
+            "kind": "personal_note"
         }
 
     def _split_node_by_org_headings(self, node_dict):
@@ -118,7 +119,7 @@ class OrgParser(DocumentParser):
         }
 
     # ---------- PUBLIC API ----------
-    def parse(self, path: Path) -> pd.DataFrame:
+    def parse_from_path(self, path):
         org_data = orgparse.load(path)
 
         nodes = [
@@ -135,3 +136,6 @@ class OrgParser(DocumentParser):
 
         formatted = [self._format_node(node) for node in split_nodes]
         return pd.DataFrame(formatted)
+
+    def parse_from_data(self, data):
+        return
