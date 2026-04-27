@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import uuid
 from pathlib import Path
@@ -22,12 +23,9 @@ class MarkdownParser(DocumentParser):
         parts = [metadata.get(lvl) for lvl in levels if metadata.get(lvl)]
         return " > ".join(parts)
 
-    def parse(
-        self, content: str, source_name: str, root_id: str, base_hierarchy: str = ""
-    ) -> pd.DataFrame:
+    def _parse(self, content: str, source_name: str, root_id: str) -> pd.DataFrame:
         """
         Parses markdown string into a DataFrame.
-        'base_hierarchy' allows us to prepend the URL path or File path.
         """
         chunks = self.splitter.split_text(content)
 
@@ -36,18 +34,35 @@ class MarkdownParser(DocumentParser):
             # Get the internal document structure (H1 > H2)
             doc_hierarchy = self._build_doc_hierarchy(chunk.metadata)
 
-            # Combine external (URL/File path) with internal (Headings)
-            full_hierarchy = f"{base_hierarchy} > {doc_hierarchy}".strip(" > ")
-
             records.append(
                 {
                     "id": str(uuid.uuid4()),
                     "root_id": root_id,
-                    "content": f"[{full_hierarchy}] {chunk.page_content}",
+                    "content": f"[{doc_hierarchy}] {chunk.page_content}" if doc_hierarchy else chunk.page_content,
                     "file_name": source_name,
-                    "hierarchy": full_hierarchy,
+                    "hierarchy": doc_hierarchy,
                     "kind": "markdown",
                 }
             )
 
         return pd.DataFrame(records)
+
+    def parse_from_path(self, path: str) -> pd.DataFrame:
+        # Read the file content using standard python
+        with open(path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Extract the file name without the extension to use as the source_name
+        file_name_with_ext = os.path.basename(path)
+        file_name_no_ext, _ = os.path.splitext(file_name_with_ext)
+        
+        # Extract the file name with the extension to use as the root_id
+        root_id = file_name_with_ext
+        
+        # Call the private _parse helper
+        return self._parse(content=content, source_name=file_name_no_ext, root_id=root_id)
+
+    def parse_from_data(self, data: str) -> pd.DataFrame:
+        # This method is called when raw string data is provided without a file path
+        # Use default fallback IDs
+        return self._parse(content=data, source_name="markdown_data", root_id="markdown_data.md")
