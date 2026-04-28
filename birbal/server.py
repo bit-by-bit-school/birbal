@@ -15,19 +15,26 @@ async def _safety_net_poller():
         print("Running periodic sync...")
         await asyncio.to_thread(sync_store)
         print("Periodic sync complete.")
-        await asyncio.sleep(config("sync_interval"))
+        await asyncio.sleep(config["sync_interval"])
 
 
 @asynccontextmanager
 async def _lifespan(app: FastAPI):
     await asyncio.to_thread(get_store)
-    fs = FileSystemSource("org")
-    watcher_task = asyncio.create_task(fs.watch(sync_file, delete_file_from_store))
+    
+    watcher_tasks = []
+    for source in config["sources"]:
+        fs = FileSystemSource(path=source["path"], formats=source["formats"])
+        task = asyncio.create_task(fs.watch(sync_file, delete_file_from_store))
+        watcher_tasks.append(task)
+
     poller_task = asyncio.create_task(_safety_net_poller())
 
     yield
 
-    watcher_task.cancel()
+    # Cleanup tasks
+    for task in watcher_tasks:
+        task.cancel()
     poller_task.cancel()
 
 

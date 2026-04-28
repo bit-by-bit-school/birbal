@@ -1,9 +1,9 @@
 import os
 from dotenv import load_dotenv
 from pathlib import Path
+import yaml
 
 load_dotenv()
-
 
 def _pg_dsn():
     return (
@@ -14,10 +14,8 @@ def _pg_dsn():
         f"port={os.getenv('POSTGRES_PORT', 5432)}"
     )
 
-
 config = {
     "port": int(os.getenv("PORT", 8080)),
-    "file_dir": os.getenv("FILE_DIR"),
     "embed_provider": os.getenv("EMBED_PROVIDER", "ollama"),
     "embed_host": os.getenv("EMBED_HOST", "http://host.docker.internal:11434"),
     "embed_api_key": os.getenv("EMBED_API_KEY", "none"),
@@ -39,3 +37,7 @@ config = {
     "postgres_dsn": _pg_dsn(),
     "migrations_dir": Path(os.getenv("MIGRATIONS_DIR", "/birbal/migrations")).resolve()
 }
+
+with open("sources.yaml", "r") as f:
+    sources = yaml.safe_load(f)["sources"]
+config["sources"] = sources
