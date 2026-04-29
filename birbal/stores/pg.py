@@ -99,11 +99,10 @@ class PostgresStore(VectorStore):
                         file_name,
                         content,
                         row_number() OVER (
-                            ORDER BY ts_rank_cd(content_tsv, websearch_to_tsquery('english', %(q)s)) DESC
+                            ORDER BY content <@> to_bm25query(%(q)s, 'nodes_content_bm25_idx')
                         ) AS rank_ix
                     FROM nodes
-                    WHERE content_tsv @@ websearch_to_tsquery('english', %(q)s)
-                    ORDER BY rank_ix
+                    ORDER BY content <@> to_bm25query(%(q)s, 'nodes_content_bm25_idx')
                     LIMIT %(d)s
                 ),
                 semantic AS (
