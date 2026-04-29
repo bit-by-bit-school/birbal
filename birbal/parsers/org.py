@@ -36,14 +36,25 @@ class OrgParser(DocumentParser):
             )
         return body.strip()
 
-    def _format_org_roam_links(self, node_body):
+    def _extract_and_format_links(self, node_body):
+        """
+        Finds all org-roam links, extracts their UUIDs into an array,
+        and replaces the link in the text with just the clean title.
+        """
         ORG_ROAM_LINK_RE = re.compile(r"\[\[id:([^\]]+)\]\[([^\]]+)\]\]")
+        extracted_ids = []
 
         def repl(match):
+            node_id = match.group(1)
             title = match.group(2)
-            return f"{title} [RELATED NOTE: {title}]"
+            extracted_ids.append(node_id)
+            return title
 
-        return ORG_ROAM_LINK_RE.sub(repl, node_body)
+        clean_body = ORG_ROAM_LINK_RE.sub(repl, node_body)
+
+        extracted_ids = list(dict.fromkeys(extracted_ids))
+
+        return clean_body, extracted_ids
 
     def _extract_node_nested_body_exclusive(self, node):
         body = node.get_body(format="raw")
@@ -59,7 +70,7 @@ class OrgParser(DocumentParser):
                 )
 
         body = body.replace("#+filetags:", "tags:").replace("#+title:", "title:")
-        return self._format_org_roam_links(body).strip()
+        return body.strip()
 
     def _build_node_hierarchy(self, node):
         hierarchy = [self._extract_title(node)]
@@ -76,7 +87,7 @@ class OrgParser(DocumentParser):
             "title": self._extract_title(node),
             "hierarchy": self._build_node_hierarchy(node),
             "text": self._extract_node_nested_body_exclusive(node),
-            "kind": "personal_note"
+            "kind": "personal_note",
         }
 
     def _split_node_by_org_headings(self, node_dict):
@@ -112,10 +123,13 @@ class OrgParser(DocumentParser):
 
     def _format_node(self, node_dict):
         formatted_hierarchy = " > ".join(reversed(node_dict["hierarchy"])).strip()
+        clean_text, linked_ids = self._extract_and_format_links(node_dict["text"])
+
         return {
             **node_dict,
             "hierarchy": formatted_hierarchy,
-            "text": f"[{formatted_hierarchy}] {node_dict['text']}",
+            "text": f"[{formatted_hierarchy}] {clean_text}",
+            "linked_node_ids": linked_ids,
         }
 
     # ---------- PUBLIC API ----------
@@ -138,4 +152,4 @@ class OrgParser(DocumentParser):
         return pd.DataFrame(formatted)
 
     def parse_from_data(self, data):
-        return
+        pass

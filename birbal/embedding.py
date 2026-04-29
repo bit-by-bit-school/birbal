@@ -27,6 +27,7 @@ def _create_metadata(row: dict) -> dict:
         "file_name": row["file_name"],
         "hierarchy": row.get("hierarchy") or row.get("title", ""),
         "kind": row.get("kind"),
+        "linked_node_ids": row.get("linked_node_ids"),
     }
 
 
@@ -106,6 +107,9 @@ def ingest_dataframe(df):
 
         - hierarchy (str)
             A series of node titles going from the current node through all its ancestors (if they exist) separated by >.
+
+        - linked_node_ids (List of str)
+           A list of root ids which are linked to the current node.
     """
     chunks = _prepare_chunks(df)
     embedder = get_embedder()

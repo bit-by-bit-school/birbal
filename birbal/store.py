@@ -22,3 +22,8 @@ def query_by_id(root_id: str):
     """Return all documents who lie in the subtree rooted at `root_id`."""
     vectordb = get_store()
     return vectordb.filter_by_metadata(metadata_field="root_id", metadata_value=root_id)
+
+
+def query_similar_unlinked_by_id(root_id: str, limit):
+    vectordb = get_store()
+    return vectordb.find_similar_unlinked(root_id, limit)

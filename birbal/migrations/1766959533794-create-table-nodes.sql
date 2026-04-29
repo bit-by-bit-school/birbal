@@ -5,6 +5,7 @@ CREATE TABLE nodes (
     file_name   TEXT,
     kind        TEXT,
     content     TEXT,
+    linked_node_ids TEXT[],
     embedding halfvec(2560),
 
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),

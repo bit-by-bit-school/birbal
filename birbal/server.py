@@ -5,7 +5,7 @@ import asyncio
 from contextlib import asynccontextmanager
 from birbal.sources import *
 from birbal.ai import query_llm
-from birbal.store import get_store, query_vector, query_by_id
+from birbal.store import get_store, query_vector, query_by_id, query_similar_unlinked_by_id
 from birbal.sync import sync_store, sync_file, delete_file_from_store
 from birbal.config import config
 
@@ -61,3 +61,8 @@ def query(id: str = Query(..., min_length=1)):
     retrieved_docs = query_by_id(id)
     docs_content = "\n\n".join(retrieved_docs)
     return docs_content
+
+
+@app.get("/similar")
+def query(id: str = Query(..., min_length=1)):
+    return query_similar_unlinked_by_id(id, 10)

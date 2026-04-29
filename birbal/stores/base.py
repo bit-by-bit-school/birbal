@@ -33,3 +33,6 @@ class VectorStore(ABC):
     def filter_by_metadata(
         self, metadata_field: str, metadata_value: str
     ) -> List[str]: ...
+
+    @abstractmethod
+    def find_similar_unlinked(self, note_id: str, limit: int) -> List[str]: ...
