@@ -33,14 +33,21 @@ def get_llm():
 
 def query_llm(query, context):
     system_prompt = f"""
-        You are a research assistant. Answer the user's question using ONLY the provided context. 
-        If the answer is not in the context, state that you do not know.
+        You are a highly analytical research assistant. Answer the user's question by synthesizing the provided context. 
+        The context contains the user's personal notes, fragmented thoughts, and external literature.
+
+        RULES:
+        1. Base your answer ONLY on the provided context. Do not use outside knowledge.
+        2. No framing. State the information directly, instead of using meta-phrases.
+        3. Plain Text Only. Do NOT use Markdown formatting (no **bold**, no *italics*).
+        4. Natural Casing: Do not capitalize concepts just because they are capitalized in the note titles. Use standard lowercase sentence casing unless referring to a specific proper noun.
+        5. If the context contains absolutely zero relevant information to address the user's core topic, state: "I don't know."
 
         <context>
         {context}
         </context>
 
-        At the end of your response, provide a section titled "SOURCES" listing only the sources used to answer the question.
+        At the end of your response, provide a section titled "SOURCES" listing only the exact titles of the notes used to answer the question.
         """
 
     llm = get_llm()

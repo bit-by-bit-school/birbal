@@ -6,7 +6,7 @@ from pathlib import Path
 from birbal.config import config
 from birbal.store import get_store
 from birbal.sources import FileSystemSource
-from birbal.parsers.base import get_parser_for_extension
+from birbal.parsers.base import DocumentParserRegistry
 from birbal.embedding import ingest_dataframe
 
 
@@ -15,7 +15,7 @@ def _ingest_files(paths: List[str], store):
         dataframes = []
         for path in paths:
             extension = Path(path).suffix.lstrip(".")
-            parser = get_parser_for_extension(extension)
+            parser = DocumentParserRegistry.get_parser_for_extension(extension)
 
             if parser is None:
                 print(f"Skipping {path} due to unsupported extension {extension}")

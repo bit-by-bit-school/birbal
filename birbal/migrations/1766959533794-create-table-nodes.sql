@@ -10,7 +10,7 @@ CREATE TABLE nodes (
         to_tsvector('english', content)
     ) STORED,
 
-    embedding halfvec(4000),
+    embedding halfvec(2560),
 
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
