@@ -1,7 +1,8 @@
 # This module runs an http server for querying the llm or vector db directly
+import asyncio
+import json
 from fastapi import FastAPI, Query
 from fastapi.responses import StreamingResponse, PlainTextResponse
-import asyncio
 from contextlib import asynccontextmanager
 from birbal.sources import *
 from birbal.ai import query_llm
@@ -43,9 +44,44 @@ app = FastAPI(lifespan=_lifespan)
 
 def run_query(query):
     retrieved_docs = query_vector(query)
-    docs_content = "\n\n".join(retrieved_docs)
+
+    context_blocks = []
+    id_lookup_map = {}
+    
+    for doc in retrieved_docs:
+        root_title = doc["hierarchy"].split(" > ")[-1].strip()
+        id_lookup_map[root_title] = doc["root_id"]
+        content = doc["content"][doc["content"].find('\n') + 1:]
+        
+        formatted_block = f"""
+        <document>
+            <note_title>{root_title}</note_title>
+            <content>
+                {content}
+            </content>
+        </document>
+        """
+
+        context_blocks.append(formatted_block)
+        
+    docs_content = "\n".join(context_blocks)
     print(docs_content)
-    yield from query_llm(query, docs_content)
+    
+    full_response = ""
+    for chunk in query_llm(query, docs_content):
+        full_response += chunk
+        yield chunk
+
+    try:
+        if "SOURCES" in full_response:
+            sources_text = full_response.split("SOURCES")[-1].strip()
+            source_titles = [line.strip("- *").strip() for line in sources_text.splitlines() if line.strip()]            
+            valid_ids = [id_lookup_map[title] for title in source_titles if title in id_lookup_map]
+            metadata_payload = f"\n\n===BIRBAL_METADATA===\n{json.dumps({'source_ids': valid_ids})}"
+            yield metadata_payload
+
+    except Exception as e:
+        print(f"Error mapping sources: {e}")
 
 
 @app.get("/query")

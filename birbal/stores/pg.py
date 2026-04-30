@@ -96,7 +96,9 @@ class PostgresStore(VectorStore):
                 WITH full_text AS (
                     SELECT
                         id,
+                        root_id,
                         file_name,
+                        hierarchy,
                         content,
                         row_number() OVER (
                             ORDER BY content <@> to_bm25query(%(q)s, 'nodes_content_bm25_idx')
@@ -108,7 +110,9 @@ class PostgresStore(VectorStore):
                 semantic AS (
                     SELECT
                         id,
+                        root_id,
                         file_name,
+                        hierarchy,
                         content,
                         row_number() OVER (
                             ORDER BY embedding <=> (%(emb)s)::halfvec
@@ -117,10 +121,12 @@ class PostgresStore(VectorStore):
                     ORDER BY rank_ix
                     LIMIT %(d)s
                 )
-                SELECT COALESCE(ft.file_name, sem.file_name) AS filename, 
+                SELECT COALESCE(ft.file_name, sem.file_name) AS filename,
+                       COALESCE(ft.root_id, sem.root_id) AS root_id,
+                       COALESCE(ft.hierarchy, sem.hierarchy) AS hierarchy,
                        COALESCE(ft.content, sem.content) AS content
                 FROM full_text ft
-                FULL OUTER JOIN semantic sem 
+                FULL OUTER JOIN semantic sem
                 USING (id)
                 ORDER BY
                     COALESCE(1.0 / (%(rrf)s + ft.rank_ix), 0) * %(lw)s +
@@ -197,8 +203,7 @@ class PostgresStore(VectorStore):
     def similarity_search(self, query_str):
         query_embedding = self.embedder.embed_query(query_str)
         k = config["k_nearest_neighbors_to_retrieve"]
-        results = self._hybrid_query(query_str, query_embedding, k)
-        return [row["content"] for row in results]
+        return self._hybrid_query(query_str, query_embedding, k)
 
     def filter_by_metadata(self, metadata_field, metadata_value):
         with self.conn.cursor(row_factory=dict_row) as cur:
