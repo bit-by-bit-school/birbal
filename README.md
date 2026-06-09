@@ -30,7 +30,7 @@ You can configure the models you would like to use in the `.env` file.
 The following models are recommended for Macbook M4 Pro as of 1 Jan, 2026.
 
 ```bash
-ollama pull qwen3-embedding:8b
+ollama pull qwen3-embedding:4b
 ollama pull llama3:instruct
 ```
 
@@ -72,7 +72,7 @@ uv pip install -e .
 ### Run the API server
 
 ```bash
-birbal-server
+uv run birbal-server
 ```
 
 Server runs at:

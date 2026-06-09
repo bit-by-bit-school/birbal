@@ -19,5 +19,7 @@ dependencies = [
     "ultimate-sitemap-parser>=1.6.0",
     "watchfiles>=1.1.1",
 ]
+[tool.uv]
+package = true
 [project.scripts]
 birbal-server = "birbal.cli:run_server"
