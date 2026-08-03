@@ -6,7 +6,12 @@ from fastapi.responses import StreamingResponse, PlainTextResponse
 from contextlib import asynccontextmanager
 from birbal.sources import *
 from birbal.ai import query_llm
-from birbal.store import get_store, query_vector, query_by_id, query_similar_unlinked_by_id
+from birbal.store import (
+    get_store,
+    query_vector,
+    query_by_id,
+    query_similar_unlinked_by_id,
+)
 from birbal.sync import sync_store, sync_file, delete_file_from_store
 from birbal.config import config
 
@@ -22,7 +27,7 @@ async def _safety_net_poller():
 @asynccontextmanager
 async def _lifespan(app: FastAPI):
     await asyncio.to_thread(get_store)
-    
+
     watcher_tasks = []
     for source in config["sources"]:
         fs = FileSystemSource(path=source["path"], formats=source["formats"])
@@ -47,12 +52,12 @@ def run_query(query):
 
     context_blocks = []
     id_lookup_map = {}
-    
+
     for doc in retrieved_docs:
         root_title = doc["hierarchy"].split(" > ")[-1].strip()
         id_lookup_map[root_title] = doc["root_id"]
-        content = doc["content"][doc["content"].find('\n') + 1:]
-        
+        content = doc["content"][doc["content"].find("\n") + 1 :]
+
         formatted_block = f"""
         <document>
             <note_title>{root_title}</note_title>
@@ -63,10 +68,10 @@ def run_query(query):
         """
 
         context_blocks.append(formatted_block)
-        
+
     docs_content = "\n".join(context_blocks)
     print(docs_content)
-    
+
     full_response = ""
     for chunk in query_llm(query, docs_content):
         full_response += chunk
@@ -75,9 +80,19 @@ def run_query(query):
     try:
         if "SOURCES" in full_response:
             sources_text = full_response.split("SOURCES")[-1].strip()
-            source_titles = [line.strip("- *").strip() for line in sources_text.splitlines() if line.strip()]            
-            valid_ids = [id_lookup_map[title] for title in source_titles if title in id_lookup_map]
-            metadata_payload = f"\n\n===BIRBAL_METADATA===\n{json.dumps({'source_ids': valid_ids})}"
+            source_titles = [
+                line.strip("- *").strip()
+                for line in sources_text.splitlines()
+                if line.strip()
+            ]
+            valid_ids = [
+                id_lookup_map[title]
+                for title in source_titles
+                if title in id_lookup_map
+            ]
+            metadata_payload = (
+                f"\n\n===BIRBAL_METADATA===\n{json.dumps({'source_ids': valid_ids})}"
+            )
             yield metadata_payload
 
     except Exception as e:

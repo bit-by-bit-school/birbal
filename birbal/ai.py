@@ -41,6 +41,7 @@ def query_llm(query, context):
         3. Plain Text Only. Do NOT use Markdown formatting.
         4. Natural Casing: Use standard lowercase sentence casing unless referring to a specific proper noun.
         5. If the context contains absolutely zero relevant information to address the user's core topic, state: "I don't know."
+        6. Skip all reasoning. Do NOT use <think> tags. Do not analyze the user's intent. Immediately output the final extracted answer.
 
         <context>
         {context}

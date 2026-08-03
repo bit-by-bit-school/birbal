@@ -1,9 +1,8 @@
-# This module converts a provided data frame into a vector embedding and stores it
+# This module converts a provided data frame into a vector embedding
 import pandas as pd
 import numpy as np
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from birbal.ai import get_embedder
-from birbal.store import get_store
 from birbal.config import config
 
 
@@ -80,9 +79,9 @@ def _batch_embed_chunks(chunks, embedder):
     return [{**chunk, "embedding": emb} for chunk, emb in zip(chunks, all_embeddings)]
 
 
-def ingest_dataframe(df):
+def embed_dataframe(df):
     """
-    Embed a Pandas DataFrame into a vector store.
+    Create embedded chunks from a Pandas DataFrame.
 
     The input DataFrame MUST contain the following columns:
 
@@ -114,5 +113,4 @@ def ingest_dataframe(df):
     chunks = _prepare_chunks(df)
     embedder = get_embedder()
     embedded_chunks = _batch_embed_chunks(chunks, embedder)
-    vectordb = get_store()
-    vectordb.upsert_nodes(embedded_chunks)
+    return embedded_chunks

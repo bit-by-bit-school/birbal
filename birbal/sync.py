@@ -7,7 +7,7 @@ from birbal.config import config
 from birbal.store import get_store
 from birbal.sources import FileSystemSource
 from birbal.parsers.base import DocumentParserRegistry
-from birbal.embedding import ingest_dataframe
+from birbal.embedding import embed_dataframe
 
 
 def _ingest_files(paths: List[str], store):
@@ -28,7 +28,9 @@ def _ingest_files(paths: List[str], store):
 
         if dataframes:
             accumulated_df = pd.concat(dataframes, ignore_index=True)
-            ingest_dataframe(accumulated_df)
+            embedded_chunks = embed_dataframe(accumulated_df)
+            vectordb = get_store()
+            vectordb.upsert_nodes(embedded_chunks)
 
     except Exception as e:
         print(f"Error ingesting files: {e}")
